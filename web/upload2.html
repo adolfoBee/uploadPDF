@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src=" https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+        <script>
+            var app = angular.module('app', []);
+            app.controller('ctrl', function ($http, $scope) {
+                
+                $scope.uploadFile = function () {
+                    var token = "randomStaticToken"; //This token is stored in local_store and would be sent with the ajax call for validation.
+                    var files = document.getElementById("files").files; //array of files
+                    var filesArray = [];
+                    for (var i = 0, file; file = files[i]; i++) //Make ajax calls for every file
+                    {
+                        var reader = new FileReader();
+                        reader.onload = (function(file) {  
+                            var fileName = file.name;
+                            var mimeType = file.type;
+                            return function (event){
+                                object = {};
+                                object.filename = fileName;
+                                object.mimeType = mimeType;
+                                object.data = event.target.result;
+                                filesArray.push(object);
+                                //console.log(object);
+                                var formData = new FormData();
+                                var formData = {
+                                    'attachmentFileName' : fileName,
+                                    'attachmentMimeType' : mimeType,
+                                    'file' : object.data
+                                };
+                                //Data to be sent will be stored in formData
+                                $http({
+                                url: "/api/upload/angular",
+                                method: "POST",
+                                data: formData,
+                                headers: {
+                                    'Authorization': 'Bearer ' + token,
+                                    'Content-Type': 'application/x-www-form-urlencoded'
+                                }
+                                })
+                                    .then(function (success) { //Success
+                                        console.log(success); 
+                                    }, function (error) {      //Error
+                                        console.log(error);   
+                                    });
+                            };
+                            })(file);  
+                            reader.readAsDataURL(file);
+                    }
+                };
+            });
+        </script>
+    </head>
+
+    <body ng-app="app" ng-controller="ctrl">
+        <input type="file" name="files" id="files" multiple>
+        <button ng-click="uploadFile()">upload file</button>
+    </body>
+</html>

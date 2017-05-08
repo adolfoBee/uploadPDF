@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+        <script>
+            function uploadFile(){
+                var token = "changeThis"; //This token is stored in local_store and would be sent with the ajax call for validation.
+                var files = document.getElementById("files").files; //array of files
+                var filesArray = [];
+                $.each(files, function(index, file) {  //Make ajax calls for every file
+                    var reader = new FileReader();
+                    reader.onload = function(event) {  
+                        object = {};
+                        object.filename = file.name;
+                        object.mimeType = file.type;
+                        object.data = event.target.result;
+                        //console.log(object);
+                        filesArray.push(object);
+                      
+                        var formData = new FormData();
+                        formData.append('attachmentFileName', object.filename);
+                        formData.append('attachmentMimeType', object.mimeType);
+                        formData.append('file', object.data);
+                        //Data to be sent will be stored in formData
+                        $.ajax({
+                            url: "/api/upload2",
+                            cache: false,
+                            contentType: false,
+                            processData: false,
+                            beforeSend: function (xhr) {
+                                xhr.setRequestHeader("Authorization", "Bearer " + token);
+                            },
+                            complete: function (xhr, text) {
+                                switch (xhr.status) {
+                                    case 400: // Bad request
+                                        alert("Bad request");
+                                        break;
+                                    case 200: // Success
+                                        break;
+                                    case 404: // Not found
+                                        alert("404 - not found.");
+                                    default: // Default response
+                                        alert("Server API error with code " + xhr.status);
+                                }
+                            },
+                            type: "POST",
+                            data: formData
+                        }).done(function (data) {   //Success
+                            console.log("success");
+                        });
+                    };  
+                    reader.readAsDataURL(file);
+                });
+            }
+        </script>
+    </head>
+    <body>
+        <input type="file" name="files" id="files" multiple>
+        <button onclick="uploadFile();">Upload Files</button>
+    </body>
+</html>
