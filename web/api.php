@@ -11,9 +11,11 @@ $log = new Logger('main');
 $log->pushHandler(new StreamHandler('../everything.log', Logger::DEBUG));
 $log->pushHandler(new StreamHandler('../errors.log', Logger::ERROR));
 
-DB::$dbName = 'uploader';
-DB::$user = 'uploader';
-DB::$password = '8F3szdkzaEpyywjW';
+
+DB::$host = 'us-cdbr-iron-east-03.cleardb.net';
+DB::$dbName = 'heroku_5ca1ba3955feec6';
+DB::$user = 'bd6b616519bbf2';
+DB::$password = 'e293abe3';
 DB::$port = 3306;
 
 DB::$error_handler = 'sql_error_handler';
